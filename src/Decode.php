@@ -24,38 +24,39 @@ class Decode
      * @return array parts with content of each part, empty if no parts found
      * @throws Exception\RuntimeException
      */
-    public static function splitMime($body, $boundary)
+    public static function splitMime($body, $boundary, $EOL = Mime::LINEEND)
     {
-        // TODO: we're ignoring \r for now - is this function fast enough and is it safe to assume noone needs \r?
-        $body = str_replace("\r", '', $body);
-
-        $start = 0;
         $res = [];
-        // find every mime part limiter and cut out the
-        // string before it.
-        // the part before the first boundary string is discarded:
-        $p = strpos($body, '--' . $boundary . "\n", $start);
-        if ($p === false) {
-            // no parts found!
-            return [];
-        }
 
-        // position after first boundary line
-        $start = $p + 3 + strlen($boundary);
+        $explodeOn = '--'.$boundary.$EOL;
+        $eof = '--'.$boundary.'--';
 
-        while (($p = strpos($body, '--' . $boundary . "\n", $start)) !== false) {
-            $res[] = substr($body, $start, $p - $start);
-            $start = $p + 3 + strlen($boundary);
-        }
+        // Determine start of message.
+        $start = strpos($body, $explodeOn);
+        // Determine end of message
+        $end = strpos($body, $eof);
 
-        // no more parts, find end boundary
-        $p = strpos($body, '--' . $boundary . '--', $start);
-        if ($p === false) {
+        if ($end === false) {
+            // There is no occurence of end of message, invalid mime message
             throw new Exception\RuntimeException('Not a valid Mime Message: End Missing');
         }
 
-        // the remaining part also needs to be parsed:
-        $res[] = substr($body, $start, $p - $start);
+        $messageLength = ($end + strlen($eof) - $start);
+
+        // Grab relevant part of message
+        $body = substr($body, $start, $messageLength);
+
+        // Explode on boundry, trim parts
+        $messages = array_filter(explode($explodeOn, $body));
+
+        foreach ($messages as $message) {
+            if ($message == "--") {
+                // this occurs at the end of the message, not a relevant part we want to return
+                break;
+            }
+            $res[] = $message;
+        }
+
         return $res;
     }
 
@@ -71,7 +72,7 @@ class Decode
      */
     public static function splitMessageStruct($message, $boundary, $EOL = Mime::LINEEND)
     {
-        $parts = static::splitMime($message, $boundary);
+        $parts = static::splitMime($message, $boundary, $EOL);
         if (count($parts) <= 0) {
             return;
         }

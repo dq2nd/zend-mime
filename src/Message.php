@@ -123,7 +123,7 @@ class Message
 
             $boundaryLine = $mime->boundaryLine($EOL);
             $body = 'This is a message in Mime Format.  If you see this, '
-                  . "your mail reader does not support this format." . $EOL;
+                  . "your reader does not support this format." . $EOL;
 
             foreach (array_keys($this->parts) as $p) {
                 $body .= $boundaryLine
