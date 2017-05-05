@@ -41,7 +41,7 @@ class Decode
             throw new Exception\RuntimeException('Not a valid Mime Message: End Missing');
         }
 
-        $messageLength = ($end + strlen($eof) - $start);
+        $messageLength = ($end - $start);
 
         // Grab relevant part of message
         $body = substr($body, $start, $messageLength);
@@ -50,10 +50,6 @@ class Decode
         $messages = array_filter(explode($explodeOn, $body));
 
         foreach ($messages as $message) {
-            if ($message == "--") {
-                // this occurs at the end of the message, not a relevant part we want to return
-                break;
-            }
             $res[] = $message;
         }
 
