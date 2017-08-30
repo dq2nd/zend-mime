@@ -233,7 +233,14 @@ class Message
         if ($boundary) {
             $parts = Decode::splitMessageStruct($message, $boundary, $EOL);
         } else {
-            Decode::splitMessage($message, $headers, $body, $EOL);
+            try {
+                Decode::splitMessage($message, $headers, $body, $EOL);
+            } catch (\Zend\Mail\Exception\RuntimeException $e) {
+                // handle exception when splitting the message, probably because it isn't multipart
+                // and so doesn't have mime-parts, with headers
+                $headers = [];
+                $body = $message;
+            }
             $parts = [[
                 'header' => $headers,
                 'body'   => $body,
