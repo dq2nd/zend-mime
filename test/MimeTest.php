@@ -209,21 +209,20 @@ class MimeTest extends \PHPUnit_Framework_TestCase
             ."\r\n"
             .'Zm9vCg=='."\r\n"
             .'--089e0141a1902f83ee04e0a07b7a--',
-            '089e0141a1902f83ee04e0a07b7a'
+            '089e0141a1902f83ee04e0a07b7a',
+            "\r\n"
         );
         $this->assertSame(2, count($message->getParts()));
     }
 
     public static function dataTestFromMessageDecode()
     {
-        return [
-            ['äöü', 'quoted-printable', '=C3=A4=C3=B6=C3=BC'],
-            // @codingStandardsIgnoreStart
-            ['Alle meine Entchen schwimmen in dem See, schwimmen in dem See, Köpfchen in das Wasser, Schwänzchen in die Höh!', 'quoted-printable', 'Alle meine Entchen schwimmen in dem See, schwimmen in dem See, K=C3=B6pfche=
-n in das Wasser, Schw=C3=A4nzchen in die H=C3=B6h!'],
-            // @codingStandardsIgnoreEnd
-            ['foobar', 'base64', 'Zm9vYmFyCg=='],
-        ];
+        return array(
+            array('äöü', 'quoted-printable', '=C3=A4=C3=B6=C3=BC'),
+            array('Alle meine Entchen schwimmen in dem See, schwimmen in dem See, Köpfchen in das Wasser, Schwänzchen in die Höh!', 'quoted-printable', 'Alle meine Entchen schwimmen in dem See, schwimmen in dem See, K=C3=B6pfche=
+n in das Wasser, Schw=C3=A4nzchen in die H=C3=B6h!'),
+            array('foobar', 'base64', 'Zm9vYmFy'),
+        );
     }
 
     /**
@@ -238,9 +237,10 @@ n in das Wasser, Schw=C3=A4nzchen in die H=C3=B6h!'],
             ."\r\n"
             .$result."\r\n"
             .'--089e0141a1902f83ee04e0a07b7a--',
-            '089e0141a1902f83ee04e0a07b7a'
+            '089e0141a1902f83ee04e0a07b7a',
+            "\r\n"
         )->getParts();
-        $this->assertSame($input."\n", $parts[0]->getRawContent());
+        $this->assertSame($input, $parts[0]->getRawContent());
     }
 
     /**
