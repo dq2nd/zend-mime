@@ -37,16 +37,16 @@ class Decode
         $end = strpos($body, $eof);
 
         if ($end === false) {
-            // There is no occurence of end of message, invalid mime message
+            // There is no occurrence of end of message, invalid mime message
             throw new Exception\RuntimeException('Not a valid Mime Message: End Missing');
         }
 
-        $messageLength = ($end - $start);
+        $messageLength = ($end - strlen($EOL) - $start);
 
         // Grab relevant part of message
         $body = substr($body, $start, $messageLength);
 
-        // Explode on boundry, trim parts
+        // Explode on boundary, trim parts
         $messages = array_filter(explode($explodeOn, $body));
 
         foreach ($messages as $message) {
@@ -102,12 +102,10 @@ class Decode
             $message = $message->toString();
         }
         // check for valid header at first line
-        $firstlinePos = strpos($message, "\n");
-        $firstline = $firstlinePos === false ? $message : substr($message, 0, $firstlinePos);
-        if (! preg_match('%^[^\s]+[^:]*:%', $firstline)) {
-            $headers = [];
-            // TODO: we're ignoring \r for now - is this function fast enough and is it safe to assume noone needs \r?
-            $body = str_replace(["\r", "\n"], ['', $EOL], $message);
+        $firstline = strtok($message, $EOL);
+        if (!preg_match('%^[^\s]+[^:]*:%', $firstline)) {
+            $headers = array();
+            $body = $message;
             return;
         }
 
