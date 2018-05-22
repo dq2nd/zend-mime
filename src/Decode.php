@@ -103,7 +103,7 @@ class Decode
         }
         // check for valid header at first line
         $firstline = strtok($message, $EOL);
-        if (!preg_match('%^[^\s]+[^:]*:%', $firstline)) {
+        if (!preg_match('%^[^\s]+[^:\s]*:%', $firstline)) {
             $headers = array();
             $body = $message;
             return;
